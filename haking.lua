@@ -42,9 +42,9 @@ local team = Workspace.lUadevwithjs:GetAttribute("TeamColor") --This is my chara
 
 local function opposingTeam(team)
     if team == "Bright Blue" then
-        return "BrightRed"
+        return "Bright Red"
     else
-        return "BrightBlue"
+        return "Bright Blue"
     end
 end
 
@@ -145,8 +145,21 @@ local Toggle = Tab:CreateToggle({
         aimbotEnabled = Value
         if Value then
             print("Async Loaded")
+            
+            Rayfield:Notify({
+                Title = "Aimbot",
+                Content = "Enabled",
+                Duration = 6.5,
+                Image = 4483362458,
+             })
         else
             print("Error Loading Async")
+            Rayfield:Notify({
+                Title = "Aimbot",
+                Content = "Disabled",
+                Duration = 6.5,
+                Image = 4483362458,
+             })
             isTracking = false  -- Stop tracking when aimbot is disabled
         end
     end,
