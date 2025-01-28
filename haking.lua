@@ -37,6 +37,18 @@ local isTracking = false
 -- Aimbot state
 local aimbotEnabled = false
 
+
+local team = Workspace.lUadevwithjs:GetAttribute("TeamColor")
+
+local function opposingTeam(team)
+    if team == "Bright Blue" then
+        return "BrightRed"
+    else
+        return "BrightBlue"
+    end
+end
+
+
 local function getDistance(pos1, pos2)
     return (pos1 - pos2).Magnitude
 end
@@ -49,6 +61,8 @@ local function isInFOV(targetPos)
 end
 
 local function findNearestPlayer()
+
+    
     local nearestPlayer = nil
     local shortestDistance = math.huge
     
@@ -58,9 +72,11 @@ local function findNearestPlayer()
     
     local myPosition = player.Character.HumanoidRootPart.Position
     local players = Players:GetPlayers()
+    local team = Workspace.lUadevwithjs:GetAttribute("TeamColor")
     
+
     for _, otherPlayer in ipairs(players) do
-        if otherPlayer ~= player then
+        if otherPlayer ~= player and otherPlayer:GetAttribute("TeamColor") == opposingTeam(team) then
             if otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
                 local playerPosition = otherPlayer.Character.HumanoidRootPart.Position
                 
@@ -105,7 +121,7 @@ end)
 -- Main tracking loop
 RunService.RenderStepped:Connect(function()
     if isTracking and aimbotEnabled then
-        local nearest, distance = findNearestPlayer()
+        local nearest, distance = findNearestPlayer() 
         
         if nearest then
             local targetPart = nearest.Character:FindFirstChild("Head") or 
