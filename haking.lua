@@ -37,18 +37,6 @@ local isTracking = false
 -- Aimbot state
 local aimbotEnabled = false
 
-
-local team = Workspace.lUadevwithjs:GetAttribute("TeamColor") --This is my character's team. 
-
-local function opposingTeam(team)
-    if team == "Bright Blue" then
-        return "Bright Red"
-    else
-        return "Bright Blue"
-    end
-end
-
-
 local function getDistance(pos1, pos2)
     return (pos1 - pos2).Magnitude
 end
@@ -69,25 +57,19 @@ local function findNearestPlayer()
     end
     
     local myPosition = player.Character.HumanoidRootPart.Position
-    local myTeam = player:GetAttribute("TeamColor") -- Player's team color (attribute in your game)
-    local opposingTeamColor = opposingTeam(myTeam) -- Determine the opposing team color
-    
     local players = Players:GetPlayers()
     
     for _, otherPlayer in ipairs(players) do
         if otherPlayer ~= player then
-            -- Ensure the player is on the opposing team
-            if otherPlayer:GetAttribute("TeamColor") == opposingTeamColor then
-                if otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    local playerPosition = otherPlayer.Character.HumanoidRootPart.Position
+            if otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local playerPosition = otherPlayer.Character.HumanoidRootPart.Position
+                
+                if isInFOV(playerPosition) then
+                    local distance = getDistance(myPosition, playerPosition)
                     
-                    if isInFOV(playerPosition) then
-                        local distance = getDistance(myPosition, playerPosition)
-                        
-                        if distance < shortestDistance and distance < TRACKING_DISTANCE then
-                            shortestDistance = distance
-                            nearestPlayer = otherPlayer
-                        end
+                    if distance < shortestDistance and distance < TRACKING_DISTANCE then
+                        shortestDistance = distance
+                        nearestPlayer = otherPlayer
                     end
                 end
             end
@@ -96,7 +78,6 @@ local function findNearestPlayer()
     
     return nearestPlayer, shortestDistance
 end
-
 
 local function smoothLookAt(targetCFrame)
     local currentCameraPosition = camera.CFrame.Position
@@ -124,7 +105,7 @@ end)
 -- Main tracking loop
 RunService.RenderStepped:Connect(function()
     if isTracking and aimbotEnabled then
-        local nearest, distance = findNearestPlayer() 
+        local nearest, distance = findNearestPlayer()
         
         if nearest then
             local targetPart = nearest.Character:FindFirstChild("Head") or 
@@ -145,21 +126,8 @@ local Toggle = Tab:CreateToggle({
         aimbotEnabled = Value
         if Value then
             print("Async Loaded")
-            
-            Rayfield:Notify({
-                Title = "Aimbot",
-                Content = "Enabled",
-                Duration = 6.5,
-                Image = 4483362458,
-             })
         else
             print("Error Loading Async")
-            Rayfield:Notify({
-                Title = "Aimbot",
-                Content = "Disabled",
-                Duration = 6.5,
-                Image = 4483362458,
-             })
             isTracking = false  -- Stop tracking when aimbot is disabled
         end
     end,
