@@ -6,6 +6,7 @@ local Window = Rayfield:CreateWindow({
    LoadingTitle = "",
    LoadingSubtitle = "",
    Theme = "Default", 
+
    DisableRayfieldPrompts = true,
    DisableBuildWarnings = true, 
 })
@@ -17,7 +18,7 @@ Rayfield:Notify({
    Image = 4483362458,
 })
 
-local Tab = Window:CreateTab("Main", 4483362458)
+local Tab = Window:CreateTab("Main", 4483362458) -- Title, Image
 local Section = Tab:CreateSection("Main Section")
 
 local Players = game:GetService("Players")
@@ -27,56 +28,15 @@ local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
--- Settings
+-- Tracking settings
 local TRACKING_DISTANCE = 100
 local SMOOTHNESS = 0.1
 local MAX_FOV = math.rad(50)
 local isTracking = false
+
+-- Aimbot state
 local aimbotEnabled = false
-local espEnabled = false
 
--- Highlight storage
-local highlightStorage = {}
-
--- ESP Functions
-local function createHighlight(model)
-    if highlightStorage[model] then
-        return highlightStorage[model]
-    end
-    
-    local highlight = Instance.new("Highlight")
-    highlight.FillColor = Color3.fromRGB(255, 0, 0)
-    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-    highlight.FillTransparency = 0.5
-    highlight.OutlineTransparency = 0
-    highlight.Parent = model
-    
-    highlightStorage[model] = highlight
-    return highlight
-end
-
-local function removeHighlight(model)
-    if highlightStorage[model] then
-        highlightStorage[model]:Destroy()
-        highlightStorage[model] = nil
-    end
-end
-
-local function updateESP()
-    if espEnabled then
-        for _, otherPlayer in ipairs(Players:GetPlayers()) do
-            if otherPlayer ~= player and otherPlayer.Character then
-                createHighlight(otherPlayer.Character)
-            end
-        end
-    else
-        for model, highlight in pairs(highlightStorage) do
-            removeHighlight(model)
-        end
-    end
-end
-
--- Original aimbot functions
 local function getDistance(pos1, pos2)
     return (pos1 - pos2).Magnitude
 end
@@ -158,25 +118,8 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- ESP Player Connections
-Players.PlayerAdded:Connect(function(plr)
-    if espEnabled and plr ~= player then
-        plr.CharacterAdded:Connect(function(char)
-            if espEnabled then
-                createHighlight(char)
-            end
-        end)
-    end
-end)
-
-Players.PlayerRemoving:Connect(function(plr)
-    if plr.Character then
-        removeHighlight(plr.Character)
-    end
-end)
-
--- Toggles
-local AimbotToggle = Tab:CreateToggle({
+-- Implement the toggle
+local Toggle = Tab:CreateToggle({
     Name = "Aimbot",
     CurrentValue = false,
     Callback = function(Value)
@@ -185,22 +128,7 @@ local AimbotToggle = Tab:CreateToggle({
             print("Async Loaded")
         else
             print("Error Loading Async")
-            isTracking = false
-        end
-    end,
-})
-
-local ESPToggle = Tab:CreateToggle({
-    Name = "ESP Highlight",
-    CurrentValue = false,
-    Callback = function(Value)
-        espEnabled = Value
-        if Value then
-            print("Desync Loaded")
-            updateESP()
-        else
-            print("Error Loading Desync")
-            updateESP()
+            isTracking = false  -- Stop tracking when aimbot is disabled
         end
     end,
 })
