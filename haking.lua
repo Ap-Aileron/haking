@@ -38,7 +38,7 @@ local isTracking = false
 local aimbotEnabled = false
 
 
-local team = Workspace.lUadevwithjs:GetAttribute("TeamColor")
+local team = Workspace.lUadevwithjs:GetAttribute("TeamColor") --This is my character's team. 
 
 local function opposingTeam(team)
     if team == "Bright Blue" then
@@ -61,8 +61,6 @@ local function isInFOV(targetPos)
 end
 
 local function findNearestPlayer()
-
-    
     local nearestPlayer = nil
     local shortestDistance = math.huge
     
@@ -71,21 +69,25 @@ local function findNearestPlayer()
     end
     
     local myPosition = player.Character.HumanoidRootPart.Position
-    local players = Players:GetPlayers()
-    local team = Workspace.lUadevwithjs:GetAttribute("TeamColor")
+    local myTeam = player:GetAttribute("TeamColor") -- Player's team color (attribute in your game)
+    local opposingTeamColor = opposingTeam(myTeam) -- Determine the opposing team color
     
-
+    local players = Players:GetPlayers()
+    
     for _, otherPlayer in ipairs(players) do
-        if otherPlayer ~= player and otherPlayer:GetAttribute("TeamColor") == opposingTeam(team) then
-            if otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local playerPosition = otherPlayer.Character.HumanoidRootPart.Position
-                
-                if isInFOV(playerPosition) then
-                    local distance = getDistance(myPosition, playerPosition)
+        if otherPlayer ~= player then
+            -- Ensure the player is on the opposing team
+            if otherPlayer:GetAttribute("TeamColor") == opposingTeamColor then
+                if otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    local playerPosition = otherPlayer.Character.HumanoidRootPart.Position
                     
-                    if distance < shortestDistance and distance < TRACKING_DISTANCE then
-                        shortestDistance = distance
-                        nearestPlayer = otherPlayer
+                    if isInFOV(playerPosition) then
+                        local distance = getDistance(myPosition, playerPosition)
+                        
+                        if distance < shortestDistance and distance < TRACKING_DISTANCE then
+                            shortestDistance = distance
+                            nearestPlayer = otherPlayer
+                        end
                     end
                 end
             end
@@ -94,6 +96,7 @@ local function findNearestPlayer()
     
     return nearestPlayer, shortestDistance
 end
+
 
 local function smoothLookAt(targetCFrame)
     local currentCameraPosition = camera.CFrame.Position
