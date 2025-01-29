@@ -6,7 +6,6 @@ local Window = Rayfield:CreateWindow({
    LoadingTitle = "",
    LoadingSubtitle = "",
    Theme = "Default", 
-
    DisableRayfieldPrompts = true,
    DisableBuildWarnings = true, 
 })
@@ -18,14 +17,14 @@ Rayfield:Notify({
    Image = 4483362458,
 })
 
-local Tab = Window:CreateTab("Main", 4483362458) -- Title, Image
+local Tab = Window:CreateTab("Main", 4483362458)
 local Section = Tab:CreateSection("Main Section")
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
-local player = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
 -- Tracking settings
@@ -36,6 +35,23 @@ local isTracking = false
 
 -- Aimbot state
 local aimbotEnabled = false
+
+-- Team checking function
+local function isOnOpposingTeam(otherPlayer)
+    -- Get both players' characters
+    local myCharacter = workspace:FindFirstChild(LocalPlayer.Name)
+    local otherCharacter = workspace:FindFirstChild(otherPlayer.Name)
+    
+    if myCharacter and otherCharacter then
+        -- Get team colors
+        local myTeam = myCharacter:GetAttribute("TeamColor")
+        local otherTeam = otherCharacter:GetAttribute("TeamColor")
+        
+        -- Return true if teams are different and not nil
+        return myTeam and otherTeam and myTeam ~= otherTeam
+    end
+    return false
+end
 
 local function getDistance(pos1, pos2)
     return (pos1 - pos2).Magnitude
@@ -52,15 +68,15 @@ local function findNearestPlayer()
     local nearestPlayer = nil
     local shortestDistance = math.huge
     
-    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         return nil, math.huge
     end
     
-    local myPosition = player.Character.HumanoidRootPart.Position
+    local myPosition = LocalPlayer.Character.HumanoidRootPart.Position
     local players = Players:GetPlayers()
     
     for _, otherPlayer in ipairs(players) do
-        if otherPlayer ~= player then
+        if otherPlayer ~= LocalPlayer and isOnOpposingTeam(otherPlayer) then
             if otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
                 local playerPosition = otherPlayer.Character.HumanoidRootPart.Position
                 
@@ -125,10 +141,10 @@ local Toggle = Tab:CreateToggle({
     Callback = function(Value)
         aimbotEnabled = Value
         if Value then
-            print("Async Loaded")
+            print("Team-based aimbot enabled")
         else
-            print("Error Loading Async")
-            isTracking = false  -- Stop tracking when aimbot is disabled
+            print("Team-based aimbot disabled")
+            isTracking = false
         end
     end,
 })
