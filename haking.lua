@@ -27,27 +27,21 @@ local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
--- Tracking settings
 local TRACKING_DISTANCE = 100
 local SMOOTHNESS = 0.1
 local MAX_FOV = math.rad(50)
 local isTracking = false
 
--- Aimbot state
 local aimbotEnabled = false
 
--- Team checking function
 local function isOnOpposingTeam(otherPlayer)
-    -- Get both players' characters
     local myCharacter = workspace:FindFirstChild(LocalPlayer.Name)
     local otherCharacter = workspace:FindFirstChild(otherPlayer.Name)
     
     if myCharacter and otherCharacter then
-        -- Get team colors
         local myTeam = myCharacter:GetAttribute("TeamColor")
         local otherTeam = otherCharacter:GetAttribute("TeamColor")
         
-        -- Return true if teams are different and not nil
         return myTeam and otherTeam and myTeam ~= otherTeam
     end
     return false
@@ -105,7 +99,6 @@ local function smoothLookAt(targetCFrame)
     camera.CFrame = newCFrame
 end
 
--- Input handling
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.UserInputType == Enum.UserInputType.MouseButton2 and aimbotEnabled then
         isTracking = true
@@ -118,7 +111,6 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
     end
 end)
 
--- Main tracking loop
 RunService.RenderStepped:Connect(function()
     if isTracking and aimbotEnabled then
         local nearest, distance = findNearestPlayer()
@@ -134,7 +126,6 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Implement the toggle
 local Toggle = Tab:CreateToggle({
     Name = "Aimbot",
     CurrentValue = false,
